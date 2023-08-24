@@ -3,8 +3,9 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.builtin import CommandStart
 from utils.belgi import belgi
 from keyboards.inline import viloyatlar
+from data.config import ADMINS
 from keyboards.default import menu
-from loader import dp, db_users
+from loader import dp, db_users, bot
 
 
 @dp.message_handler(CommandStart())
@@ -12,6 +13,11 @@ async def bot_start(msg: types.Message, state : FSMContext):
     user = db_users.select_user_by_id(msg.from_user.id)
     if user == None:
         db_users.add_user(msg.from_user.id, msg.from_user.full_name, None)
+        for admin in ADMINS:
+            try:
+                await bot.send_message(admin, f"<b>➕Yangi foydalanuvchi qo'shildi, {msg.from_user.get_mention(msg.from_user.first_name)}</b>")
+            except :
+                pass
         await msg.answer(f"<b>Assalomu alaykum {msg.from_user.get_mention(msg.from_user.full_name)}, botimizga xush kelibsiz !\n\nUshbu bot orqali testlarimizni ishlab, o'z bilimingizni sinab ko'rishingiz mumkin 😊</b>")
         await msg.answer("<b><i>Ism-familiyangizni kiriting : </i></b>")
         await state.set_state("ism kiritadi")
