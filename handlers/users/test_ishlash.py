@@ -195,7 +195,7 @@ async def test_yuborish(call : types.CallbackQuery, state : FSMContext):
     if result != None:
         answer += f"<b>Ushbu testni ishlagansiz ❗️\nNatijangiz : <i>{result[2]} ball ({round(foiz, 1)}%)</i></b>\n\n"
         
-    answer += f"<b>Ushbu testni boshlash uchun <code>🟢Testni boshlash</code> tugmaisni bosing❗️</b>"
+    answer += f"<b>Ushbu testni boshlash uchun <code>🟢Testni boshlash</code> tugmasini bosing❗️</b>"
     
     await call.message.answer(answer, reply_markup=testni_boshlash.boshlash(test[0], son))
     await state.set_state("testni yuborish")

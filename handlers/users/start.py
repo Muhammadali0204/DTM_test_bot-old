@@ -7,7 +7,11 @@ from data.config import ADMINS
 from keyboards.default import menu
 from loader import dp, db_users, bot
 
-
+@dp.message_handler(text="/menu", state="*")
+async def menuu(msg : types.Message, state : FSMContext):
+    await msg.answer("<b>Menu : </b>", reply_markup=menu.menu)
+    await state.finish()
+    
 @dp.message_handler(CommandStart())
 async def bot_start(msg: types.Message, state : FSMContext):
     user = db_users.select_user_by_id(msg.from_user.id)
