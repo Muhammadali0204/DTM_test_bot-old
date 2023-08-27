@@ -176,17 +176,20 @@ async def test_yuborish(call : types.CallbackQuery, state : FSMContext):
         answer += f"<b>📕Test turi : <i>Asosiy</i></b>\n"
         answer += f"<b>📗Fan nomi : <i>{fan[1]}</i></b>\n"
         answer += f"<b>🔢Savollar soni : <i>{len(test[3])}</i></b>\n\n"
-        foiz = result[2] / 93 * 100
+        if result != None:
+            foiz = result[2] / 93 * 100
     elif son == "2":
         answer += f"<b>📚Test turi : <i>Majburiy</i></b>\n"
         answer += f"<b>📗Fanlar : <i>Matematika, Ona tili, O'zb.Tarix</i></b>\n"
         answer += f"<b>🔢Savollar soni : <i>{len(test[3])}</i></b>\n\n"
-        foiz = result[2] / 33 * 100
+        if result != None:
+            foiz = result[2] / 33 * 100
     elif son == "3":
         answer += f"<b>📚Test turi : <i>Blok</i></b>\n"
         answer += f"<b>📗Yo'nalish : <i>{fan[1]}</i></b>\n"
         answer += f"<b>🔢Savollar soni : <i>{len(test[3])}</i></b>\n\n"
-        foiz = result[2] / 189 * 100
+        if result != None:
+            foiz = result[2] / 189 * 100
         
     answer = f"<b>{test[4]}</b>\n\n"
         
