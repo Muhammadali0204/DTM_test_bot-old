@@ -75,6 +75,19 @@ class Database:
         
         self.execute(sql, commit=True)
         
+    def create_table_temp(self):
+        sql = """
+        CREATE TABLE Temp(
+            id  INTEGER UNIQUE,
+            datetime    TEXT,
+            test_id     INTEGER,
+            fan_id  INTEGER,
+            status  INTEGER
+        );
+        """
+        
+        self.execute(sql=sql, commit=True)
+        
         
         
         
@@ -149,5 +162,16 @@ class Database:
     
     def select_fan(self, id):
         return self.execute(sql="SELECT * FROM Fanlar WHERE id = ?", parameters=(id,), fetchone=True)
+    
+    # Temp
+    
+    def add_temp(self, id, datetime, test_id, fan_id, status):
+        self.execute(sql="INSERT INTO Temp(id, datetime, test_id, fan_id, status) VALUES (?,?,?,?,?)", parameters=(id, datetime, test_id, fan_id, status), commit=True)
+        
+    def select_temp(self, id):
+        return self.execute(sql="SELECT * FROM Temp WHERE id = ?", parameters=(id,), fetchone=True)
+    
+    def delete_temp(self, id):
+        self.execute(sql="DELETE FROM Temp WHERE id = ?", parameters=(id,), commit=True)
     
     

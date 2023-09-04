@@ -3,22 +3,36 @@ from aiogram.dispatcher import FSMContext
 from utils.belgi import belgi
 from keyboards.inline import fanlar_keyboard, testlar_keyboard,testni_boshlash
 from keyboards.default import menu, test_turi
-from loader import dp, db_users, db_tests, db_results, test_time, bot
-import datetime, pytz, asyncio
+from loader import dp, db_users, db_tests, db_results, bot, db_temp
+import datetime, pytz
 
-# test_time[user_id] = [datetime, test_id, fan_id, status]
 
 @dp.message_handler(text="👨‍💻Test ishlash")
 async def test(msg : types.Message, state : FSMContext):
-    try : 
-        test_t = test_time[msg.from_user.id]
+        test_t = db_temp.select_temp(msg.from_user.id)
+        # test_t = (id, datetime, test_id, fan_id, status) 
+        # datetime = "00:00 01.01.2000"
         if test_t != None:
             time_now = datetime.datetime.now(pytz.timezone("Asia/Tashkent"))
-            test = db_tests.select_test(test_t[1])
-            if time_now > test_t[0]:
+            test = db_tests.select_test(test_t[2])
+            
+            tugash_vaqti = test_t[1]
+            soat_vaqt = tugash_vaqti.split(" ")
+            vaqt = soat_vaqt[0].split(":") # vaqt[0] = soat, vaqt[1] = minut
+            sana =  soat_vaqt[1].split(".")
+            for i in range(0, 2):
+                vaqt[i] = int(vaqt[i])
+            for i in range(0, 3):
+                sana[i] = int(sana[i])
+            tugash_vaqti = datetime.datetime(sana[2], sana[1], sana[0], vaqt[0], vaqt[1], tzinfo=pytz.timezone("Etc/GMT-5"))
+            
+            print(tugash_vaqti)
+            print(time_now)
+            
+            if time_now > tugash_vaqti:
                 db_results.add_result(msg.from_user.id, test[0], 0)
-            elif time_now <= test_t[0]:
-                fan = db_tests.select_fan(test_t[2])
+            elif time_now <= tugash_vaqti:
+                fan = db_tests.select_fan(test_t[3])
                 if test[2] != 0:
                     javob = f"<b>Siz hozirda {fan[1]} fanidan {test[0]} - kodli testni ishlamoqdasiz ❗️\nAvval shu testni yakunlang, so`ngra boshqa testlarni ishlashingiz mumkin bo'ladi.</b>"
                     await msg.answer(javob, reply_markup=menu.menu)
@@ -27,10 +41,9 @@ async def test(msg : types.Message, state : FSMContext):
                     javob = f"<b>Siz hozirda majburiy fanlarning {test[0]} - kodli testni ishlamoqdasiz ❗️\nAvval shu testni yakunlang, so`ngra boshqa testlarni ishlashingiz mumkin bo'ladi.</b>"
                     await msg.answer(javob, reply_markup=menu.menu)
                     return
-    except :
-        pass
-    await msg.answer("<b>Qanday turdagi test ishlamoqchisiz ❓</b>", reply_markup=test_turi.test_ishlash)
-    await state.set_state("test turi")
+        else:   
+            await msg.answer("<b>Qanday turdagi test ishlamoqchisiz ❓</b>", reply_markup=test_turi.test_ishlash)
+            await state.set_state("test turi")
     
 @dp.message_handler(text="◀️Ortga", state=["test turi", "mening natijam bo'lim"])
 async def salom(msg : types.Message, state : FSMContext):
@@ -220,17 +233,17 @@ async def testni_yubor(call : types.CallbackQuery, state : FSMContext):
     if son == "1":
         caption = f"<b>⏱Test yechish uchun berilgan vaqt : <i>1 soat 30 daqiqa</i></b>\n\n"  
         t = datetime.datetime.now(pytz.timezone("Asia/Tashkent"))
-        vaqt0 = t.strftime("%H:%M %d.%m")
+        vaqt0 = t.strftime("%H:%M %d.%m.%Y")
         t = t + datetime.timedelta(seconds=5400)
-        vaqt = t.strftime("%H:%M %d.%m")
+        vaqt = t.strftime("%H:%M %d.%m.%Y")
         caption += f"<b>🕑Test boshlanish vaqti : <i>{vaqt0}</i></b>\n"
         caption += f"<b>🕓Test tugash vaqti : <i>{vaqt}</i></b>\n\n"
         result = db_results.select_result(call.from_user.id, test_id)
         if result == None:
-            test_time[call.from_user.id] = [t, test_id, test[2], 1]
+            db_temp.add_temp(call.from_user.id, vaqt, test_id, test[2], 1)
             caption += f"<b><i>❗️Test javoblarini shu vaqt oralig'ida yubormasangiz, testdan olgan ballingiz 0 ball deb baholanadi</i></b>"
         else:
-            test_time[call.from_user.id] = [t, test_id, test[2], 2]
+            db_temp.add_temp(call.from_user.id, vaqt, test_id, test[2], 2)
             caption += f"<b><i>❕Siz ushbu testni avval ishlagansiz va {result[2]} ball to'plagansiz</i></b>"
         await call.message.answer_document(test[1], caption=caption, reply_markup=menu.menu)
         await state.finish()
@@ -238,17 +251,17 @@ async def testni_yubor(call : types.CallbackQuery, state : FSMContext):
     elif son == "2":
         caption = f"<b>⏱Test yechish uchun berilgan vaqt : <i>1 soat.</i></b>\n\n"  
         t = datetime.datetime.now(pytz.timezone("Asia/Tashkent"))
-        vaqt0 = t.strftime("%H:%M %d.%m")
+        vaqt0 = t.strftime("%H:%M %d.%m.%Y")
         t = t + datetime.timedelta(seconds=3600)
-        vaqt = t.strftime("%H:%M %d.%m")
+        vaqt = t.strftime("%H:%M %d.%m.%Y")
         caption += f"<b>🕑Test boshlanish vaqti : <i>{vaqt0}</i></b>\n"
         caption += f"<b>🕓Test tugash vaqti : <i>{vaqt}</i></b>\n\n"
         result = db_results.select_result(call.from_user.id, test_id)
         if result == None:
-            test_time[call.from_user.id] = [t, test_id, 0, 1]
+            db_temp.add_temp(call.from_user.id, vaqt, test_id, 0, 1)
             caption += f"<b><i>❗️Test javoblarini shu vaqt oralig'ida yubormasangiz, testdan olgan ballingiz 0 ball deb baholanadi</i></b>"
         else:
-            test_time[call.from_user.id] = [t, test_id, 0, 2]
+            db_temp.add_temp(call.from_user.id, vaqt, test_id, 0, 2)
             caption += f"<b><i>❕Siz ushbu testni avval ishlagansiz va {result[2]} ball to'plagansiz</i></b>"
         await call.message.answer_document(test[1], caption=caption, reply_markup=menu.menu)
         await state.finish()
@@ -256,17 +269,17 @@ async def testni_yubor(call : types.CallbackQuery, state : FSMContext):
     elif son == "3":
         caption = f"<b>⏱Test yechish uchun berilgan vaqt : <i>3 soat 30 daqiqa</i></b>\n\n"  
         t = datetime.datetime.now(pytz.timezone("Asia/Tashkent"))
-        vaqt0 = t.strftime("%H:%M %d.%m")
+        vaqt0 = t.strftime("%H:%M %d.%m.%Y")
         t = t + datetime.timedelta(seconds=12600)
-        vaqt = t.strftime("%H:%M %d.%m")
+        vaqt = t.strftime("%H:%M %d.%m.%Y")
         caption += f"<b>🕑Test boshlanish vaqti : <i>{vaqt0}</i></b>\n"
         caption += f"<b>🕓Test tugash vaqti : <i>{vaqt}</i></b>\n\n"
         result = db_results.select_result(call.from_user.id, test_id)
         if result == None:
-            test_time[call.from_user.id] = [t, test_id, test[2], 1]
+            db_temp.add_temp(call.from_user.id, vaqt, test_id, test[2], 1)
             caption += f"<b><i>❗️Test javoblarini shu vaqt oralig'ida yubormasangiz, testdan olgan ballingiz 0 ball deb baholanadi</i></b>"
         else:
-            test_time[call.from_user.id] = [t, test_id, test[2], 2]
+            db_temp.add_temp(call.from_user.id, vaqt, test_id, test[2], 2)
             caption += f"<b><i>❕Siz ushbu testni avval ishlagansiz va {result[2]} ball to'plagansiz</i></b>"
         await call.message.answer_document(test[1], caption=caption, reply_markup=menu.menu)
         await state.finish()

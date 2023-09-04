@@ -5,7 +5,7 @@ from utils.belgi import belgi
 from keyboards.inline import viloyatlar, javob_berish, tasdiqlash, abcd_variant
 from keyboards.default import menu, ortga
 from utils.misc import abcd
-from loader import dp, db_users, test_time, db_tests, db_results, temp, bot
+from loader import dp, db_users, test_time, db_tests, db_results, temp, bot, db_temp
 import datetime, pytz
 
 
@@ -15,14 +15,29 @@ import datetime, pytz
 @dp.message_handler(text="🏁Javoblarni tekshirish")
 async def javob_berish1(msg : types.Message, state : FSMContext):
     try:
+        # test_t = (id, datetime, test_id, fan_id, status) 
+        # datetime = "00:00 01.01.2000"
+        test_t = db_temp.select_temp(msg.from_user.id)
+        tugash_vaqti = test_t[1]
+        soat_vaqt = tugash_vaqti.split(" ")
+        vaqt = soat_vaqt[0].split(":") # vaqt[0] = soat, vaqt[1] = minut
+        sana =  soat_vaqt[1].split(".")
+        for i in range(0, 2):
+            vaqt[i] = int(vaqt[i])
+        for i in range(0, 3):
+            sana[i] = int(sana[i])
+        tugash_vaqti = datetime.datetime(sana[2], sana[1], sana[0], vaqt[0], vaqt[1], tzinfo=pytz.timezone("Etc/GMT-5"))
+        
+        test_time[msg.from_user.id] = [tugash_vaqti, test_t[2], test_t[3], test_t[4]]
+        
         data = test_time[msg.from_user.id]
         if data != None:
             time_now = datetime.datetime.now(pytz.timezone("Asia/Tashkent"))
-            last_time = data[0].strftime("%H:%M %d.%m")
+            last_time = test_t[1]
             if time_now > data[0]:
                 answer = f"<b>Siz berilgan vaqt ichida javob yubormadingiz.\n<i>({last_time} gacha javob yuborishingiz kerak edi)</i>\n\nUshbu testdan olgan balingiz : 0</b>"
                 if data[3] == 1:
-                    db_results.add_result(msg.from_user.id, data[1], 0)
+                    db_results.add_result(msg.from_user.id, data[1], 0, data[2])
                 await msg.answer(answer, reply_markup=menu.menu)
             else:
                 answer = f"<b>Test javoblarini <code>{last_time}</code> gacha yuborishingiz mumkin ❗️\n\nJavoblarni haqiqatdan ham yubormoqchimisiz ❓</b>"
@@ -38,20 +53,10 @@ async def javob_olish(call : types.CallbackQuery, state : FSMContext):
     await call.message.delete()
     data = test_time[call.from_user.id]
     test = db_tests.select_test(data[1])
-    if data[2] == 0:
-        answer = f"<b>Yaxshi, savollar soni <i>{len(test[3])}</i> ta ✅\n\nJavoblarni quyidagi ko'rinishda yuboring : \n\nabcdabcd... ({len(test[3])} ta)\n\n(Katta harflar bo'lishi ham mumkin)\n\n<i>Misol uchun : \n1 - savolning javobi a\n2 - savolning javobi b\n3 - savolning javobi c bo'lsin.\nYuborishingiz kerak bo'lgan javob : <code>abc</code> ko'rinishida bo'ladi ❗️</i></b>"
-        await call.message.answer(answer, reply_markup=ortga.ortga)
-        await state.set_state("javoblarni yuborishi kerak user")
-    else:
-        fan = db_tests.select_fan(data[2])
-        if fan[2] == 1:
-            answer = f"<b>Yaxshi, savollar soni <i>{len(test[3])}</i> ta ✅\n\nJavoblarni quyidagi ko'rinishda yuboring : \n\nabcdabcd... ({len(test[3])} ta)\n\n(Katta harflar bo'lishi ham mumkin)\n\n<i>Misol uchun : \n1 - savolning javobi a\n2 - savolning javobi b\n3 - savolning javobi c bo'lsin.\nYuborishingiz kerak bo'lgan javob : <code>abc</code> ko'rinishida bo'ladi ❗️</i></b>"
-            await call.message.answer(answer, reply_markup=ortga.ortga)
-            await state.set_state("javoblarni yuborishi kerak user")
-        elif fan[2] == 3:
-            answer = f"<b>Yaxshi, savollar soni <i>{len(test[3])}</i> ta ✅\n\nJavoblarni quyidagi ko'rinishda yuboring : \n\nabcdabcd... ({len(test[3])} ta)\n\n<i>Misol uchun : \n1 - savolning javobi a\n2 - savolning javobi b\n3 - savolning javobi c bo'lsin.\nYuborishingiz kerak bo'lgan javob : <code>abc</code> ko'rinishida bo'ladi ❗️</i></b>"
-            await call.message.answer(answer, reply_markup=ortga.ortga)
-            await state.set_state("javoblarni yuborishi kerak user")
+    answer = f"<b>Yaxshi, savollar soni <i>{len(test[3])}</i> ta ✅\n\nJavoblarni quyidagi ko'rinishda yuboring : \n\nabcdabcd... ({len(test[3])} ta)\n\n(Katta harflar bo'lishi ham mumkin)\n\n<i>Misol uchun : \n1 - savolning javobi a\n2 - savolning javobi b\n3 - savolning javobi c bo'lsin.\nYuborishingiz kerak bo'lgan javob : <code>abc</code> ko'rinishida bo'ladi ❗️</i></b>"
+    await call.message.answer(answer, reply_markup=ortga.ortga)
+    await state.set_state("javoblarni yuborishi kerak user")
+    
         
 @dp.callback_query_handler(text="yo'q", state="javob berishni tasdiqlash")
 async def javob_olish_yuq(call : types.CallbackQuery, state : FSMContext):
@@ -76,10 +81,10 @@ async def javob_olish_yuq(call : types.CallbackQuery, state : FSMContext):
         if soat != 0:
             answer += f"<b>Yaxshi, sizda yana {soat} soat, </b>"
             if minut != 0:
-                answer += f"<b>{minut} daqiqa </b>"
+                answer += f"<b>{minut+1} daqiqa </b>"
             answer += f"<b>vaqtingiz bor 🕑\n\nBemalol barcha testlarni bajarib, javob yuborishingiz mumkin 😊</b>"
         elif minut != 0:
-            answer += f"<b>Yaxshi, sizda yana {minut} daqiqa </b>"
+            answer += f"<b>Yaxshi, sizda yana {minut+1} daqiqa </b>"
             answer += f"<b>vaqtingiz bor 🕑\n\nBarcha testlarni bajarib, tezroq javob yuborishni maslahat beramiz 😉</b>"
         else :
             answer += "<b>Menu : </b>"
@@ -145,7 +150,6 @@ async def ozgartirish(call : types.CallbackQuery, state : FSMContext):
     await call.message.delete_reply_markup()
     await call.message.answer("<b>Nechanchi savolga bergan javobingizni almashtirmoqchisiz ❓</b>")
     await state.set_state("savolning raqami")
-# temp[user_id] = [javob, message_id]
 
 
 @dp.message_handler(text="◀️Ortga", state = "savolning raqami")
@@ -228,12 +232,15 @@ async def tekshirishh(call : types.CallbackQuery, state : FSMContext):
     # test_time[user_id] = [datetime, test_id, fan_id, status]
     data = test_time[call.from_user.id]
     time_now = datetime.datetime.now(pytz.timezone("Asia/Tashkent"))
-    last_time = data[0].strftime("%H:%M %d.%m")
+    last_time = data[0].strftime("%H:%M %d.%m.%Y")
     if time_now > data[0]:
         answer = f"<b>Siz berilgan vaqt ichida javob yubormadingiz.\n<i>({last_time} gacha javob yuborishingiz kerak edi)</i></b>"
         if data[3] == 1:
             answer += "<b>\n\nUshbu testdan olgan balingiz : 0</b>"
             db_results.add_result(call.from_user.id, data[1], 0)
+        db_temp.delete_temp(call.from_user.id)
+        temp[call.from_user.id] = None
+        test_time[call.from_user.id] = None
         await call.message.delete()
         await call.answer(answer, reply_markup=menu.menu)
         await state.finish()
@@ -409,6 +416,7 @@ async def tekshirishh(call : types.CallbackQuery, state : FSMContext):
                 await call.message.answer(answer, reply_markup=menu.menu)
         
         await state.finish()
+        db_temp.delete_temp(call.from_user.id)
         temp[call.from_user.id] = None
         test_time[call.from_user.id] = None
         

@@ -10,7 +10,7 @@ dp = Dispatcher(bot, storage=storage)
 db_users = sqlite.Database()
 db_tests = sqlite.Database("data/Tests.db")
 db_results = sqlite.Database("data/Results.db")
-
+db_temp = sqlite.Database("data/Temp.db")
 
 try:
     db_users.create_table_users()
@@ -23,6 +23,11 @@ except :
     pass
 try:
     db_results.create_table_results()
+except :
+    pass
+
+try:
+    db_temp.create_table_temp()
 except :
     pass
 
