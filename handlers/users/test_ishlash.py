@@ -26,19 +26,16 @@ async def test(msg : types.Message, state : FSMContext):
                 sana[i] = int(sana[i])
             tugash_vaqti = datetime.datetime(sana[2], sana[1], sana[0], vaqt[0], vaqt[1], tzinfo=pytz.timezone("Etc/GMT-5"))
             
-            print(tugash_vaqti)
-            print(time_now)
-            
             if time_now > tugash_vaqti:
                 db_results.add_result(msg.from_user.id, test[0], 0)
             elif time_now <= tugash_vaqti:
                 fan = db_tests.select_fan(test_t[3])
                 if test[2] != 0:
-                    javob = f"<b>Siz hozirda {fan[1]} fanidan {test[0]} - kodli testni ishlamoqdasiz ❗️\nAvval shu testni yakunlang, so`ngra boshqa testlarni ishlashingiz mumkin bo'ladi.</b>"
+                    javob = f"<b>Siz hozirda {fan[1]} fanidan test ishlamoqdasiz ❗️\nAvval testni yakunlang, so`ngra boshqa testlarni ishlashingiz mumkin bo'ladi ✅\n⏱Amaldagi test uchun berilgan vaqt {test_t[1]} gacha</b>"
                     await msg.answer(javob, reply_markup=menu.menu)
                     return
                 else:
-                    javob = f"<b>Siz hozirda majburiy fanlarning {test[0]} - kodli testni ishlamoqdasiz ❗️\nAvval shu testni yakunlang, so`ngra boshqa testlarni ishlashingiz mumkin bo'ladi.</b>"
+                    javob = f"<b>Siz hozirda majburiy fanlardan test ishlamoqdasiz ❗️\nAvval  testni yakunlang, so`ngra boshqa testlarni ishlashingiz mumkin bo'ladi ✅\n⏱Amaldagi test uchun berilgan vaqt {test_t[1]} gacha</b>"
                     await msg.answer(javob, reply_markup=menu.menu)
                     return
         else:   
