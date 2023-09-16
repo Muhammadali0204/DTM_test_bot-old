@@ -27,9 +27,9 @@ async def test(msg : types.Message, state : FSMContext):
             tugash_vaqti = datetime.datetime(sana[2], sana[1], sana[0], vaqt[0], vaqt[1], tzinfo=pytz.timezone("Etc/GMT-5"))
             
             if time_now > tugash_vaqti:
-                answer = f"<b>Siz berilgan vaqt ichida javob yubormadingiz.\n<i>({test_t[1]} gacha javob yuborishingiz kerak edi)</i></b>"
+                answer = f"<b>Siz berilgan vaqt ichida javob yubormadingiz ❌\n<i>({test_t[1]} gacha javob yuborishingiz kerak edi)</i></b>"
                 if test_t[3] == 1:
-                    answer += "<b>\n\nUshbu testdan olgan balingiz : 0</b>"
+                    answer += "<b>\n\nUshbu testdan olgan balingiz : 0️⃣</b>"
                 db_results.add_result(msg.from_user.id, test[0], 0, test[2])
                 db_temp.delete_temp(msg.from_user.id)
             elif time_now <= tugash_vaqti:

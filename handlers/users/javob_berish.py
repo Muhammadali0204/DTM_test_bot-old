@@ -5,6 +5,7 @@ from utils.belgi import belgi
 from keyboards.inline import viloyatlar, javob_berish, tasdiqlash, abcd_variant
 from keyboards.default import menu, ortga
 from utils.misc import abcd
+from utils import raqam
 from loader import dp, db_users, test_time, db_tests, db_results, temp, bot, db_temp
 import datetime, pytz
 
@@ -234,9 +235,9 @@ async def tekshirishh(call : types.CallbackQuery, state : FSMContext):
     time_now = datetime.datetime.now(pytz.timezone("Asia/Tashkent"))
     last_time = data[0].strftime("%H:%M %d.%m.%Y")
     if time_now > data[0]:
-        answer = f"<b>Siz berilgan vaqt ichida javob yubormadingiz.\n<i>({last_time} gacha javob yuborishingiz kerak edi)</i></b>"
+        answer = f"<b>Siz berilgan vaqt ichida javob yubormadingiz ❌\n<i>({last_time} gacha javob yuborishingiz kerak edi)</i></b>"
         if data[3] == 1:
-            answer += "<b>\n\nUshbu testdan olgan balingiz : 0</b>"
+            answer += "<b>\n\nUshbu testdan olgan balingiz : 0️⃣</b>"
             db_results.add_result(call.from_user.id, data[1], 0)
         db_temp.delete_temp(call.from_user.id)
         temp[call.from_user.id] = None
@@ -274,25 +275,26 @@ async def tekshirishh(call : types.CallbackQuery, state : FSMContext):
                     count3 += 1
                 else:
                     tarix.append("❌")
-            
-            answer = f"<b>#Majburiy_fanlar\n\n\n📚Fanlar : \nOna tili\nMatematika\nO'zbekiston tarixi\n\n\n📕Ona tili -- <i>{round(count1*1.1, 1)}</i> ball <i>({count1} ta, 1.1 ball)</i>\n\n</b>"
+            balll = await raqam.digit_to_emoji(round(count1*1.1, 1))
+            answer = f"<b>#Majburiy_fanlar\n\n\n📚Fanlar : \nOna tili\nMatematika\nO'zbekiston tarixi\n\n\n📕Ona tili -- <i>{balll}</i> ball <i>({count1} ta, 1.1 ball)</i>\n\n</b>"
             for i in range(0,10):
                 answer += f"<i>{i+1} - {ona_tili[i]}</i> "
                 if i == 4:
                     answer += "\n"
-            
-            answer += f"<b>\n\n📗Matematika() -- <i>{round(count2*1.1, 1)}</i> ball <i>({count2} ta, 1.1 ball)</i>\n\n</b>"
+            balll = await raqam.digit_to_emoji(round(count2*1.1, 1))
+            answer += f"<b>\n\n📗Matematika() -- <i>{balll}</i> ball <i>({count2} ta, 1.1 ball)</i>\n\n</b>"
             for i in range(0,10):
                 answer += f"<i>{i+11} - {matematika[i]}</i> "
                 if i == 4:
                     answer += "\n"
-            answer += f"<b>\n\n\n📘O'zbekiston tarixi -- <i>{round(count3*1.1, 1)}</i> ball <i>({count3} ta, 1.1 ball)</i>\n\n</b>"    
+            balll = await raqam.digit_to_emoji(round(count3*1.1, 1))
+            answer += f"<b>\n\n\n📘O'zbekiston tarixi -- <i>{balll}</i> ball <i>({count3} ta, 1.1 ball)</i>\n\n</b>"    
             for i in range(0,10):
                 answer += f"<i>{i+21} - {tarix[i]}</i> "
                 if i == 4:
                     answer += "\n"
-                    
-            answer += f"<b>\n\n\✅Umumiy ball : <i>{round((count1 + count2 + count3)*1.1, 1)}</i> ball <i>({count1 + count2 + count3} ta)</i></b>"
+            balll = await raqam.digit_to_emoji(round((count1 + count2 + count3)*1.1, 1))
+            answer += f"<b>\n\n\✅Umumiy ball : <i>{balll}</i> ball <i>({count1 + count2 + count3} ta)</i></b>"
             if data[3] == 1:
                 db_results.add_result(call.from_user.id, data[1], round((count1 + count2 + count3)*1.1, 1), 0)
             await call.message.delete()
@@ -312,8 +314,8 @@ async def tekshirishh(call : types.CallbackQuery, state : FSMContext):
                         ball += 1
                     else:
                         natija.append("❌")
-                
-                answer = f"<b>#Asosiy_fan\n\n\n{fan[1]} -- <i>{round(ball*3.1, 1)}</i> ball <i>({ball} ta, 3.1 ball)</i>\n\n</b>"
+                balll = await raqam.digit_to_emoji(round(ball*3.1, 1))
+                answer = f"<b>#Asosiy_fan\n\n\n{fan[1]} -- <i>{balll}</i> ball <i>({ball} ta, 3.1 ball)</i>\n\n</b>"
                 for i in range(0, 30):
                     answer += f"<i>{i+1} - {natija[i]}</i> "
                     if i in [4, 9, 14, 19, 24]:
@@ -404,12 +406,18 @@ async def tekshirishh(call : types.CallbackQuery, state : FSMContext):
                 
                         
                 fan_list = fan.split(" va ")
-                answer = f"<b>#Blok_test\n\n\n📚Majburiy fanlar\n1️⃣{fan_list[0]}\n2️⃣{fan_list[1]}\n\n\n📕Ona tili -- <i>{round(ona_tili[0]*1.1, 1)}</i> ball <i>({ona_tili[0]} ta, 1.1 ball)</i>\n\n</b>{ona_tili[1]}\n\n"
-                answer += f"<b>📗Matematika -- <i>{round(matem[0]*1.1, 1)}</i> ball <i>({matem[0]} ta, 1.1 ball)</i>\n\n</b>{matem[1]}\n\n" 
-                answer += f"<b>📘O'zbekiston tarixi -- <i>{round(tarix[0]*1.1, 1)}</i> ball <i>({tarix[0]} ta, 1.1 ball)</i>\n\n</b>{tarix[1]}\n\n"
-                answer += f"<b>1️⃣{fan_list[0]} -- <i>{round(birinchi[0]*3.1, 1)}</i> ball <i>({birinchi[0]} ta, 3.1 ball)</i>\n\n</b>{birinchi[1]}\n\n"
-                answer += f"<b>2️⃣{fan_list[1]} -- <i>{round(ikkinchi[0]*3.1, 1)}</i> ball <i>({ikkinchi[0]} ta, 2.1 ball)</i>\n\n</b>{ikkinchi[1]}\n\n"
-                answer += f"<b>✅Umumiy ball : <i>{round(birinchi[0]*3.1 + ikkinchi[0] * 2.1 + (ona_tili[0] + tarix[0] + matem[0])*1.1, 1)}</i> ball</b>\n\n"
+                balll = await raqam.digit_to_emoji(round(ona_tili[0]*1.1, 1))
+                answer = f"<b>#Blok_test\n\n\n📚Majburiy fanlar\n1️⃣{fan_list[0]}\n2️⃣{fan_list[1]}\n\n\n📕Ona tili -- <i>{balll}</i> ball <i>({ona_tili[0]} ta, 1.1 ball)</i>\n\n</b>{ona_tili[1]}\n\n"
+                balll = await raqam.digit_to_emoji(round(matem[0]*1.1, 1))
+                answer += f"<b>📗Matematika -- <i>{balll}</i> ball <i>({matem[0]} ta, 1.1 ball)</i>\n\n</b>{matem[1]}\n\n"
+                balll = await raqam.digit_to_emoji(round(tarix[0]*1.1, 1))
+                answer += f"<b>📘O'zbekiston tarixi -- <i>{balll}</i> ball <i>({tarix[0]} ta, 1.1 ball)</i>\n\n</b>{tarix[1]}\n\n"
+                balll = await raqam.digit_to_emoji(round(birinchi[0]*3.1, 1))
+                answer += f"<b>1️⃣{fan_list[0]} -- <i>{balll}</i> ball <i>({birinchi[0]} ta, 3.1 ball)</i>\n\n</b>{birinchi[1]}\n\n"
+                balll = await raqam.digit_to_emoji(round(ikkinchi[0]*3.1, 1))
+                answer += f"<b>2️⃣{fan_list[1]} -- <i>{balll}</i> ball <i>({ikkinchi[0]} ta, 2.1 ball)</i>\n\n</b>{ikkinchi[1]}\n\n"
+                balll = await raqam.digit_to_emoji(round(birinchi[0]*3.1 + ikkinchi[0] * 2.1 + (ona_tili[0] + tarix[0] + matem[0])*1.1, 1))
+                answer += f"<b>✅Umumiy ball : <i>{balll}</i> ball</b>\n\n"
                 if data[3] == 1:  
                     db_results.add_result(call.from_user.id, test[0], round(birinchi[0]*3.1 + ikkinchi[0] * 2.1 + (ona_tili[0] + tarix[0] + matem[0])*1.1, 1), data[2])
                 await call.message.delete()
@@ -419,5 +427,9 @@ async def tekshirishh(call : types.CallbackQuery, state : FSMContext):
         db_temp.delete_temp(call.from_user.id)
         temp[call.from_user.id] = None
         test_time[call.from_user.id] = None
+        
+        
+        
+
         
     
