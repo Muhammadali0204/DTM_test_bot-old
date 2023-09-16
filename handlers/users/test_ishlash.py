@@ -27,7 +27,8 @@ async def test(msg : types.Message, state : FSMContext):
             tugash_vaqti = datetime.datetime(sana[2], sana[1], sana[0], vaqt[0], vaqt[1], tzinfo=pytz.timezone("Etc/GMT-5"))
             
             if time_now > tugash_vaqti:
-                db_results.add_result(msg.from_user.id, test[0], 0)
+                db_results.add_result(msg.from_user.id, test[0], 0, test[2])
+                db_temp.delete_temp(msg.from_user.id)
             elif time_now <= tugash_vaqti:
                 fan = db_tests.select_fan(test_t[3])
                 if test[2] != 0:
