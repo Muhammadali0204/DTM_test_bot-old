@@ -25,5 +25,5 @@ async def digit_to_emoji(number):
             emoji += "0️⃣"
         elif a == ".":
             emoji += "."
-    
+
     return emoji

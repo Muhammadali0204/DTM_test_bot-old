@@ -9,6 +9,6 @@ from keyboards.inline.forward_copy import inline_key
 from loader import dp
 
 
-@dp.message_handler(text=["admin", "Admin"], chat_id =ADMINS)
-async def admin(msg : types.Message):
+@dp.message_handler(text=["admin", "Admin"], chat_id=ADMINS)
+async def admin(msg: types.Message):
     await msg.answer("Admin panel : ", reply_markup=admin_menu.menu)

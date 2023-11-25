@@ -4,7 +4,7 @@ javob_berish = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(text="❌Yo'q", callback_data="yo'q"),
-            InlineKeyboardButton(text="✅Ha", callback_data="ha")
+            InlineKeyboardButton(text="✅Ha", callback_data="ha"),
         ]
     ]
 )

@@ -14,21 +14,21 @@ db_temp = sqlite.Database("data/Temp.db")
 
 try:
     db_users.create_table_users()
-except :
+except:
     pass
 try:
     db_tests.create_table_tests()
     db_tests.create_table_fanlar()
-except :
+except:
     pass
 try:
     db_results.create_table_results()
-except :
+except:
     pass
 
 try:
     db_temp.create_table_temp()
-except :
+except:
     pass
 
 
