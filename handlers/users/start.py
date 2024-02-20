@@ -58,8 +58,11 @@ async def ism_olish(msg: types.Message, state: FSMContext):
 
 @dp.callback_query_handler(state="viloyat")
 async def viloyat(call: types.CallbackQuery, state: FSMContext):
+    print(1)
     viloyat = call.data
+    print(viloyat)
     db_users.update_vil(call.from_user.id, viloyat)
+    print(2)
     await call.message.delete()
     await call.message.answer("🎊")
     await call.message.answer(
