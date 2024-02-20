@@ -16,7 +16,7 @@ async def javob_berish(msg: types.Message, state: FSMContext):
     answer = f"<b>👤Botning foydalanuvchilari soni : <i>{users_count}</i> ta</b>\n"
     answer += f"<b>📂Botda mavjud testlar soni : <i>{tests_count}</i> ta</b>\n"
     answer += f"<b>📝Foydalanuvchilar ishlagan testlar soni : <i>{results_count}</i> ta</b>\n\n"
-    answer += f"<b>👨‍💻Admin : @javob_tekshir_admin_bot\n\n🤖Boshqa botlarimiz :\n1. <i>@javob_tekshir_bot</i>\n2. <i>@trend_music_bot</i></b>"
+    answer += f"<b>👨‍💻Admin : @dtm_test_admin</b>"
 
     await msg.answer(answer)
 

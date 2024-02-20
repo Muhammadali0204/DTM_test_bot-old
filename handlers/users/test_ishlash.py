@@ -10,8 +10,6 @@ import datetime, pytz
 @dp.message_handler(text="👨‍💻Test ishlash")
 async def test(msg: types.Message, state: FSMContext):
     test_t = db_temp.select_temp(msg.from_user.id)
-    # test_t = (id, datetime, test_id, fan_id, status)
-    # datetime = "00:00 01.01.2000"
     if test_t != None:
         time_now = datetime.datetime.now(pytz.timezone("Asia/Tashkent"))
         test = db_tests.select_test(test_t[2])
@@ -34,21 +32,24 @@ async def test(msg: types.Message, state: FSMContext):
         )
 
         if time_now > tugash_vaqti:
-            answer = f"<b>Siz berilgan vaqt ichida javob yubormadingiz ❌\n<i>({test_t[1]} gacha javob yuborishingiz kerak edi)</i></b>"
-            if test_t[3] == 1:
+            answer = f"<b>Siz avvalgi testni berilgan vaqt ichida javob yubormadingiz ❌\n<i>({test_t[1]} gacha javob yuborishingiz kerak edi)</i></b>"
+            if test_t[4] == 1:
                 answer += "<b>\n\nUshbu testdan olgan balingiz : 0️⃣</b>"
-            db_results.add_result(msg.from_user.id, test[0], 0, test[2])
+                db_results.add_result(msg.from_user.id, test[0], 0, test[2])
             db_temp.delete_temp(msg.from_user.id)
+            await msg.answer(answer)
+            await msg.answer(
+                "<b>Qanday turdagi test ishlamoqchisiz ❓</b>",
+                reply_markup=test_turi.test_ishlash,
+            )
+            await state.set_state("test turi")
         elif time_now <= tugash_vaqti:
             fan = db_tests.select_fan(test_t[3])
             if test[2] != 0:
                 javob = f"<b>Siz hozirda {fan[1]} fanidan test ishlamoqdasiz ❗️\nAvval testni yakunlang, so`ngra boshqa testlarni ishlashingiz mumkin bo'ladi ✅\n⏱Amaldagi test uchun berilgan vaqt {test_t[1]} gacha</b>"
-                await msg.answer(javob, reply_markup=menu.menu)
-                return
             else:
                 javob = f"<b>Siz hozirda majburiy fanlardan test ishlamoqdasiz ❗️\nAvval  testni yakunlang, so`ngra boshqa testlarni ishlashingiz mumkin bo'ladi ✅\n⏱Amaldagi test uchun berilgan vaqt {test_t[1]} gacha</b>"
-                await msg.answer(javob, reply_markup=menu.menu)
-                return
+            await msg.answer(javob, reply_markup=menu.menu)
     else:
         await msg.answer(
             "<b>Qanday turdagi test ishlamoqchisiz ❓</b>",

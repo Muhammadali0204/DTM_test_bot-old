@@ -43,9 +43,11 @@ async def javob_berish1(msg: types.Message, state: FSMContext):
             time_now = datetime.datetime.now(pytz.timezone("Asia/Tashkent"))
             last_time = test_t[1]
             if time_now > data[0]:
-                answer = f"<b>Siz berilgan vaqt ichida javob yubormadingiz.\n<i>({last_time} gacha javob yuborishingiz kerak edi)</i>\n\nUshbu testdan olgan balingiz : 0</b>"
+                answer = f"<b>Siz berilgan vaqt ichida javob yubormadingiz.\n<i>({last_time} gacha javob yuborishingiz kerak edi)</i></b>"
                 if data[3] == 1:
+                    answer += "<b>\n\nUshbu testdan olgan balingiz : 0️⃣</b>"
                     db_results.add_result(msg.from_user.id, data[1], 0, data[2])
+                db_temp.delete_temp(msg.from_user.id)
                 await msg.answer(answer, reply_markup=menu.menu)
             else:
                 answer = f"<b>Test javoblarini <code>{last_time}</code> gacha yuborishingiz mumkin ❗️\n\nJavoblarni haqiqatdan ham yubormoqchimisiz ❓</b>"
